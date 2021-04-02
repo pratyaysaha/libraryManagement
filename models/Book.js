@@ -4,7 +4,8 @@ const mongoose=require('mongoose')
 const BookSchema=mongoose.Schema({
     isbn:{
         type : Number,
-        required: true
+        required: true,
+        unique : true
     },
     name:{
         type : String,
@@ -21,6 +22,14 @@ const BookSchema=mongoose.Schema({
     price:{
         type : Number,
         required: true
+    },
+    yop:{
+        type: Number,
+        required : true
+    },
+    edition: {
+        type : Number,
+        default : 1
     },
     total:{
         type : Number,
