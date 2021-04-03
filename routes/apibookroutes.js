@@ -46,9 +46,23 @@ router.get('/', async (req,res)=>{
     if(req.query.price)
         q.price=req.query.price
     if(req.query.genre)
-        q.genre={'$in':req.query.genre.split(',')}
+    {
+        var searchGenre=[]
+        req.query.genre.split(',').map((item)=>
+        {
+            searchGenre.push(new RegExp(item))
+        })
+        q.genre={'$in':searchGenre}
+    }
     if(req.query.author)    
-        q.author={'$in':req.query.author.split(',')}
+    {
+        var searchAuthor=[]
+        req.query.author.split(',').map((item)=>
+        {
+            searchAuthor.push(new RegExp(item))
+        })
+        q.author={'$in':searchAuthor}
+    }
     if(req.query.yop)
         q.yop=req.query.yop
     if(req.query.edition)
@@ -108,10 +122,10 @@ router.patch('/', async (req,res)=>{
     //use (+) for increment and (-) for decrement 
     if(req.body.quantity)
         setQuery.$inc={'total' : req.body.quantity, 'present' : req.body.quantity }
-    console.log(setCondn);
+    console.log(setCondn)
     console.log(setQuery)
     try{
-        const bookUpdate= await Book.updateOne(setCondn,setQuery)
+        const bookUpdate= await Book.updateOne(setCondn,setQuery,{ runValidators: true, context: 'query'})
         res.json({'status' : bookUpdate.ok, 'data' : await Book.findOne(setCondn) })
     }
     catch(err){

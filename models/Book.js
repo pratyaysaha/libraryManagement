@@ -9,19 +9,24 @@ const BookSchema=mongoose.Schema({
     },
     name:{
         type : String,
-        required: true
+        required: true,
+        lowercase:true,
+        
     },
     publisher:{
         type : String,
-        required: true
+        required: true,
+        lowercase: true
     },
     author:{
         type: [String],
-        required: true
+        required: true,
+        lowercase: true
     },
     price:{
         type : Number,
-        required: true
+        required: true,
+        min: 0
     },
     yop:{
         type: Number,
@@ -29,19 +34,23 @@ const BookSchema=mongoose.Schema({
     },
     edition: {
         type : Number,
-        default : 1
+        default : 1,
+        min:1
     },
     total:{
         type : Number,
-        required: true
+        required: true,
+        min:1
     },
     present:{
         type : Number,
-        required: true
+        required: true,
+        min:0
     },
     genre:{
         type : [String],
-        required: true
+        required: true,
+        lowercase: true
     }
 
 })
