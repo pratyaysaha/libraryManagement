@@ -125,7 +125,7 @@ router.patch('/', async (req,res)=>{
     {
         //had to create own validation with fetch 
         //mongo doesnot run validation on $inc operator in update
-        if(await validateQuantiy(req.query.isbn,req.body.quantity))
+        if(await validateQuantiy(req.query.isbn,req.body.quantity,req.get('host')))
             setQuery.$inc={'total' : req.body.quantity, 'present' : req.body.quantity }
         else    
             return res.json({'status' : false, 'error' : 'quantity exceeded', 'code' : 10})
@@ -143,9 +143,9 @@ router.patch('/', async (req,res)=>{
 })
 
 
-const validateQuantiy = async (isbn,quantity) => {
+const validateQuantiy = async (isbn,quantity,host) => {
     var total,present
-    await fetch(`http://localhost:3000/api/book?isbn=${isbn}`)
+    await fetch(`http://${host}/api/book?isbn=${isbn}`)
         .then((response)=>response.json())
         .then((data)=>{
             total=data.total
