@@ -2,6 +2,7 @@ const { json } = require('express')
 const express = require('express');
 const { set } = require('mongoose');
 const Book= require('../models/Book')
+const fetch = require('node-fetch');
 
 const router=express.Router();
 
@@ -121,7 +122,14 @@ router.patch('/', async (req,res)=>{
     //increment the quantity of books present
     //use (+) for increment and (-) for decrement 
     if(req.body.quantity)
-        setQuery.$inc={'total' : req.body.quantity, 'present' : req.body.quantity }
+    {
+        //had to create own validation with fetch 
+        //mongo doesnot run validation on $inc operator in update
+        if(await validateQuantiy(req.query.isbn,req.body.quantity))
+            setQuery.$inc={'total' : req.body.quantity, 'present' : req.body.quantity }
+        else    
+            return res.json({'status' : false, 'error' : 'quantity exceeded', 'code' : 10})
+    }
     console.log(setCondn)
     console.log(setQuery)
     try{
@@ -129,9 +137,24 @@ router.patch('/', async (req,res)=>{
         res.json({'status' : bookUpdate.ok, 'data' : await Book.findOne(setCondn) })
     }
     catch(err){
-        res.json({'status' : false , 'error': err ,'data' : setQuery})
+        res.json({'status' : false , 'error': err ,'data' : setQuery, 'code' : 20})
     }
 
 })
+
+
+const validateQuantiy = async (isbn,quantity) => {
+    var total,present
+    await fetch(`http://localhost:3000/api/book?isbn=${isbn}`)
+        .then((response)=>response.json())
+        .then((data)=>{
+            total=data.total
+            present=data.present
+        })
+        if(total+quantity<=0 || present+quantity<0)
+            return false
+        return true
+    
+}
 
 module.exports=router
