@@ -29,7 +29,7 @@ router.post('/', async (req,res)=>{
         res.json(bookAdd)
     }
     catch(err){
-        res.json({"status" : false, "error": err})
+        res.json({"status" : false, "error": err, "code" : 101})
     }
 })
 
@@ -37,8 +37,13 @@ router.get('/', async (req,res)=>{
     var q={}
     if(req.query.isbn)
     {
-        const Query=await Book.findOne({'isbn':req.query.isbn})
-        return res.json(Query)
+        try{
+            const Query=await Book.findOne({'isbn':req.query.isbn})
+            return res.json(Query)
+        }
+        catch(err){
+            return res.json({"status" : false, "error": err, "code" : 102})
+        }
     }
     if(req.query.name)
         q.name={'$regex' : req.query.name ,'$options' : 'i' }
@@ -76,7 +81,7 @@ router.get('/', async (req,res)=>{
         res.json(QueryResponse)
     }
     catch(err){
-        res.json({'status': false, 'error' : err})
+        res.json({'status': false, 'error' : err, 'code': 103})
     }
 })
 
@@ -142,6 +147,26 @@ router.patch('/', async (req,res)=>{
 
 })
 
+router.delete('/',async (req,res)=>{
+    var setCondn={}
+    console.log(req.query)
+    if(req.query.isbn)
+    {
+        setCondn.isbn= req.query.isbn
+    }
+    console.log(setCondn)
+    try{
+        const deleteBook = await Book.deleteOne({'isbn':req.query.isbn})
+        if(deleteBook.deletedCount!=0)
+            res.json({'status' : true , 'ok' : deleteBook.ok,'deleteCount': deleteBook.deletedCount})
+        else
+            res.json({'status': false, 'error' : "No book against the ISBN", 'code': 100 })
+    }
+    catch(err){
+        res.json({'status' : false, 'error' : err, 'code': 200 })
+    } 
+
+})
 
 const validateQuantiy = async (isbn,quantity,host) => {
     var total,present
