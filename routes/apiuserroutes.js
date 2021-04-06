@@ -90,5 +90,9 @@ router.get('/', async (req,res)=>{
 })
 
 
+router.patch("/", (req,res) => {
+    res.json({"status" : true})
+})
+
 
 module.exports=router
