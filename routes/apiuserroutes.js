@@ -33,28 +33,9 @@ router.post('/', async (req,res)=>{
 })
 
 router.get('/', async (req,res)=>{
-    try{
-        if(req.query.appid == undefined)
-            throw new Error(0)
-        var cred=req.query.appid.split('@')
-        console.log(cred)
-        if(cred.length< 2 || cred.length > 2)
-            throw new Error(cred.length)
-    }
-    catch(err){
-        error={'status' : false}
-        if(err > 2)
-        {
-            error.error="Enter Username@Password"
-            error.code=23
-        }
-        else
-        {
-            error.error="Enter Username@Password"
-            error.code=24
-        }
-        res.json(error)
-    }    
+    const {status, error, code}=await validateUser(req.query.appid,"admin")
+    if(status==false)
+        res.json({'status' : status, error, code})
     var querySearch={}
     const queryLookUp=[ "firstName", "lastName", "username", "email", "dob", "phoneNumber", "role" ,"id"]
     for(queryItem in req.query)
@@ -68,18 +49,7 @@ router.get('/', async (req,res)=>{
         }
     }
     console.log(querySearch)
-    try{
-        const adminSearch= await User.findOne({'username' : cred[0], role: 'admin'})
-        if(adminSearch == null)
-            throw new Error("Admin not found")  
-        const {password} = adminSearch
-        const isTrue= await bcrypt.compare(cred[1],password)
-        if(isTrue == false)
-            throw new Error("Password incorrect")
-    }
-    catch(err){ 
-        res.json({'status': false, 'error': err.message, 'code' : 25 })  
-    }
+    
     try{
         const searchQuery= await User.find(querySearch,{password : 0})
         res.json(searchQuery)
@@ -89,6 +59,48 @@ router.get('/', async (req,res)=>{
     }
 })
 
+
+
+const validateUser = async (credString,roles) =>{
+    var error={'status': false}
+    try{
+        if(credString == undefined)
+            throw new Error(0)
+        var cred=credString.split('@')
+        if(cred.length< 2 || cred.length > 2)
+            throw new Error(cred.length)
+    }
+    catch(err){
+        if(err > 2)
+        {
+            error.error="Enter Username@Password"
+            error.code=23
+        }
+        else
+        {
+            error.error="Enter Username@Password"
+            error.code=24
+        }
+        return error 
+    }
+    try{
+        const userSearch= await User.findOne({'username' : cred[0], role: roles})
+        if(userSearch == null)
+            throw new Error("Admin not found")  
+        const {password} = userSearch
+        const isTrue= await bcrypt.compare(cred[1],password)
+        if(isTrue == false)
+            throw new Error("Password incorrect")
+        else    
+            return {'status' : true, 'error' : "No error"}
+    }
+    catch(err){ 
+        error.error=err.message
+        error.code=25
+    }  
+    console.log(error)  
+    return error
+}
 
 
 module.exports=router
