@@ -79,7 +79,15 @@ router.patch("/",async (req,res) => {
     {
         if(LookUp.includes(Item))
         {  
-            queryUpdate[`${Item}`]=req.body[Item]
+            if(Item=="password")
+            {
+                var hashedPassword= await bcrypt.hash(req.body.password,10)
+                queryUpdate[`${Item}`]=hashedPassword
+            }
+            else
+            {
+                queryUpdate[`${Item}`]=req.body[Item]
+            }
         }
     }
     console.log(queryUpdate)
