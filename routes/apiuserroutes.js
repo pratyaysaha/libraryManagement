@@ -65,15 +65,14 @@ router.get('/', async (req,res)=>{
 
 
 router.patch("/",async (req,res) => {
-    const {status, error, code}=await validateUser(req.query.appid,"user")
-    if(status==false)
-        res.json({'status' : status, error, code})
-    var q={}
-    console.log(req.body)
-    if(req.query.appid)
-    {
-        q.appid=req.query.appid
-    }
+    const validationResult = await validateUser(req.query.appid,"all")
+    if(validationResult.status==false)
+        res.json(validationResult)
+  
+
+    const data = validationResult.data
+    const userid = data._id
+    
     var queryUpdate={}
     const LookUp=[ "firstName", "lastName", "username", "email", "dob", "phoneNumber", "role" ,"password"]
     for(Item in req.body)
@@ -84,16 +83,18 @@ router.patch("/",async (req,res) => {
         }
     }
     console.log(queryUpdate)
-    console.log(q)
+    // console.log(q)
     try{
-        const updateQuery= await User.updateOne(q, queryUpdate, { runValidators: true, context: 'query'} )
+        const updateQuery= await User.updateOne({"_id" : `${userid}`}, queryUpdate, { runValidators: true, context: 'query'} )
         res.json({"status" : updateQuery.ok, "data" : await User.findOne(queryUpdate)})
-        console.log(updateQuery)
+        // console.log(updateQuery)
     }
     catch(err){
         res.json({'status' : false, 'error' : err, 'code' : 26}) 
     }
 })
+
+
 
 
 
