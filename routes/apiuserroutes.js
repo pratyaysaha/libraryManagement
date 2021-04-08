@@ -1,7 +1,7 @@
 const express =require ('express')
-const bcrypt=require('bcrypt')
 const User=require('../models/User')
-
+const bcrypt=require('bcrypt')
+const validateUser=require('../functions/validateuser')
 
 const router=express.Router()
 router.use(express.json())
@@ -31,30 +31,10 @@ router.post('/', async (req,res)=>{
         res.json({"status" : false , 'error': err, 'code' : 22}) 
     }
 })
-
 router.get('/', async (req,res)=>{
-    try{
-        if(req.query.appid == undefined)
-            throw new Error(0)
-        var cred=req.query.appid.split('@')
-        console.log(cred)
-        if(cred.length< 2 || cred.length > 2)
-            throw new Error(cred.length)
-    }
-    catch(err){
-        error={'status' : false}
-        if(err > 2)
-        {
-            error.error="Enter Username@Password"
-            error.code=23
-        }
-        else
-        {
-            error.error="Enter Username@Password"
-            error.code=24
-        }
-        res.json(error)
-    }    
+    const {status, error, code}=await validateUser(req.query.appid,"admin")
+    if(status==false)
+        res.json({'status' : status, error, code})
     var querySearch={}
     const queryLookUp=[ "firstName", "lastName", "username", "email", "dob", "phoneNumber", "role" ,"id"]
     for(queryItem in req.query)
@@ -68,18 +48,7 @@ router.get('/', async (req,res)=>{
         }
     }
     console.log(querySearch)
-    try{
-        const adminSearch= await User.findOne({'username' : cred[0], role: 'admin'})
-        if(adminSearch == null)
-            throw new Error("Admin not found")  
-        const {password} = adminSearch
-        const isTrue= await bcrypt.compare(cred[1],password)
-        if(isTrue == false)
-            throw new Error("Password incorrect")
-    }
-    catch(err){ 
-        res.json({'status': false, 'error': err.message, 'code' : 25 })  
-    }
+    
     try{
         const searchQuery= await User.find(querySearch,{password : 0})
         res.json(searchQuery)
@@ -93,6 +62,9 @@ router.get('/', async (req,res)=>{
 router.patch("/", (req,res) => {
     res.json({"status" : true})
 })
+
+
+
 
 
 module.exports=router
