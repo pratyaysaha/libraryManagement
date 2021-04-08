@@ -86,7 +86,7 @@ router.patch("/",async (req,res) => {
     // console.log(q)
     try{
         const updateQuery= await User.updateOne({"_id" : `${userid}`}, queryUpdate, { runValidators: true, context: 'query'} )
-        res.json({"status" : updateQuery.ok, "data" : await User.findOne(queryUpdate)})
+        res.json({"status" : updateQuery.ok, "data" : await User.findById(userid)})
         // console.log(updateQuery)
     }
     catch(err){
@@ -96,6 +96,23 @@ router.patch("/",async (req,res) => {
 
 
 
+router.delete("/",async (req,res) => {
+    const validationResult = await validateUser(req.query.appid,"all")
+    if(validationResult.status==false)
+        res.json(validationResult)
+    
+    const data = validationResult.data
+    const userid = data.username
+    console.log(userid)
+    try{
+        const deleteQuery= await User.deleteOne({"username" : `${userid}`})
+        res.json({'status' : deleteQuery.ok , message : "post deleted"})
+        // console.log(updateQuery)
+    }
+    catch(err){
+        res.json({'status' : false, 'error' : err, 'code' : 26}) 
+    }
+})
 
 
 
