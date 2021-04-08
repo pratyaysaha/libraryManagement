@@ -30,5 +30,5 @@
 - ```23```  : Credential Error (format not correct). More than two argument
 - ```24```  : Credential Error (format not correct). Less than two
 ardument
-- ```25```  : Creedential Error. Admin not Found / Password not found
+- ```25```  : Creedential Error. User not Found / Password not found
 - ```26```  : GET (user) failed.
