@@ -3,8 +3,13 @@ const User=require('../models/User')
 const bcrypt=require('bcrypt')
 const validateUser=require('../functions/validateuser')
 
+
+
+
 const router=express.Router()
+
 router.use(express.json())
+
 
 router.post('/', async (req,res)=>{
     try{
