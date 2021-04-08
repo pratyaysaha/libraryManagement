@@ -5,33 +5,38 @@ const validateUser = async (credString,roles) =>{
     try{
         if(credString == undefined)
             throw new Error(0)
-        var cred=credString.split('@')
+        var cred=credString.split(' ')
         if(cred.length< 2 || cred.length > 2)
             throw new Error(cred.length)
     }
     catch(err){
         if(err > 2)
         {
-            error.error="Enter Username@Password"
+            error.error="Enter Username<space>Password"
             error.code=23
         }
         else
         {
-            error.error="Enter Username@Password"
+            error.error="Enter Username<space>Password"
             error.code=24
         }
         return error 
     }
     try{
-        const userSearch= await User.findOne({'username' : cred[0], role: roles})
+        var userSearch={}
+        if(roles=='all')
+            userSearch= await User.findOne({'username' : cred[0]})
+        else
+            userSearch= await User.findOne({'username' : cred[0], role: roles})
         if(userSearch == null)
-            throw new Error(`${roles} not found`)  
-        const {password} = userSearch
-        const isTrue= await bcrypt.compare(cred[1],password)
+            throw new Error(`${roles==='all'?'User/Admin':roles} not found`)  
+        const isTrue= await bcrypt.compare(cred[1],userSearch.password)
         if(isTrue == false)
             throw new Error("Password incorrect")
         else    
-            return {'status' : true, 'error' : "No error"}
+            var user=userSearch
+            user.password="It is secret"
+            return {'status' : true, 'error' : "No error", "data": user}
     }
     catch(err){ 
         error.error=err.message
