@@ -32,3 +32,5 @@
 ardument
 - ```25```  : Creedential Error. User not Found / Password not found
 - ```26```  : GET (user) failed.
+- ```27```  : PATCH (user) failed.
+- ```28```  : DELETE (user) failed
