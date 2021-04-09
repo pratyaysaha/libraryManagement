@@ -125,7 +125,7 @@ router.delete("/",async (req,res) => {
     }
 })
 
-
+//http:localhost:3000/api/user
 
 
 module.exports=router
