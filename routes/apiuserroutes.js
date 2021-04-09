@@ -98,7 +98,9 @@ router.patch("/",async (req,res) => {
         // console.log(updateQuery)
     }
     catch(err){
+
         res.json({'status' : false, 'error' : err, 'code' : 27})  
+
     }
 })
 
@@ -114,6 +116,7 @@ router.delete("/",async (req,res) => {
     console.log(userid)
     try{
         const deleteQuery= await User.deleteOne({"username" : `${userid}`})
+
         res.json({'status' : deleteQuery.ok , message : "User deleted"})
         // console.log(updateQuery)
     }
