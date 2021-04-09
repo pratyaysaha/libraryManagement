@@ -64,6 +64,63 @@ router.get('/', async (req,res)=>{
 })
 
 
+router.patch("/",async (req,res) => {
+    const validationResult = await validateUser(req.query.appid,"all")
+    if(validationResult.status==false)
+        res.json(validationResult)
+  
+
+    const data = validationResult.data
+    const userid = data._id
+    
+    var queryUpdate={}
+    const LookUp=[ "firstName", "lastName", "username", "email", "dob", "phoneNumber", "role" ,"password"]
+    for(Item in req.body)
+    {
+        if(LookUp.includes(Item))
+        {  
+            if(Item=="password")
+            {
+                var hashedPassword= await bcrypt.hash(req.body.password,10)
+                queryUpdate[`${Item}`]=hashedPassword
+            }
+            else
+            {
+                queryUpdate[`${Item}`]=req.body[Item]
+            }
+        }
+    }
+    console.log(queryUpdate)
+    // console.log(q)
+    try{
+        const updateQuery= await User.updateOne({"_id" : `${userid}`}, queryUpdate, { runValidators: true, context: 'query'} )
+        res.json({"status" : updateQuery.ok, "data" : await User.findById(userid)})
+        // console.log(updateQuery)
+    }
+    catch(err){
+        res.json({'status' : false, 'error' : err, 'code' : 26}) 
+    }
+})
+
+
+
+router.delete("/",async (req,res) => {
+    const validationResult = await validateUser(req.query.appid,"all")
+    if(validationResult.status==false)
+        res.json(validationResult)
+    
+    const data = validationResult.data
+    const userid = data.username
+    console.log(userid)
+    try{
+        const deleteQuery= await User.deleteOne({"username" : `${userid}`})
+        res.json({'status' : deleteQuery.ok , message : "post deleted"})
+        // console.log(updateQuery)
+    }
+    catch(err){
+        res.json({'status' : false, 'error' : err, 'code' : 26}) 
+    }
+})
 
 
 
